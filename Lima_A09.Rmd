@@ -1,0 +1,173 @@
+---
+title: "Activity: Street or Road?"
+author: "Guilherme Lima"
+output: html_notebook
+---
+
+## Load in the data
+
+```{r}
+#load libraries 
+library(tidyverse)
+#load in the data here 
+# we will only be using the "street-addresses.csv" file from the text
+download.file(url="https://mdbeckman.github.io/dcSupplement/data/CMS_ProvidersSimple.rds",
+              destfile = "Your-Name-For-The-File.rds")
+DataTable <- readRDS("Your-Name-For-The-File.rds")
+
+
+```
+
+## Recreate Solved Example using `sample(50)`
+
+```{r}
+Addresses <- read_csv("https://mdbeckman.github.io/dcSupplement/data/street-addresses.csv")
+Sample <- 
+  Addresses %>%
+  sample_n(size = 50)
+
+SampleMatches <- 
+  Sample %>%
+  filter(grepl(pattern = "PO", address))
+
+SampleDont <- 
+  Sample %>%
+  filter( !grepl(pattern = "PO", address))
+
+pattern <- "BOX\\s+(\\d+)"
+
+SampleMatches <- 
+  Sample %>% 
+  filter(grepl(pattern, address))
+
+SampleDont <-
+  Sample %>%
+  filter( !grepl(pattern, address))
+
+SampleDont
+
+SampleBoxNumbers <- 
+  Sample %>%
+  filter(grepl(pattern, address)) %>%
+  tidyr::extract(address, into = "boxnum", regex = pattern)
+```
+
+## Recreate Soved Example using the entire `Address` data set
+
+```{r}
+AddressMatches <- 
+  Addresses %>%
+  filter(grepl(pattern = "PO", address))
+
+AddressDont <- 
+  Addresses %>%
+  filter( !grepl(pattern = "PO", address))
+
+pattern <- "BOX\\s+(\\d+)"
+
+AddressMatches <- 
+  Addresses %>% 
+  filter(grepl(pattern, address))
+
+AddressDont <-
+  Addresses %>%
+  filter( !grepl(pattern, address))
+
+AddressDont
+
+AddressBoxNumbers <- 
+  Addresses %>%
+  filter(grepl(pattern, address)) %>%
+  tidyr::extract(address, into = "boxnum", regex = pattern)
+```
+
+#### Additional Question: How many addresses are a PO BOX (including NCSU BOX)? 
+
+```{r}
+AddressBoxNumbers %>% summarise(count = n())
+
+```
+
+My answer here...... 
+11100
+
+## Back to the Streets: Your Turn
+
+#### Part 1: Explain (in english) each line of the following code chunk
+
+```{r}
+pattern <- "(ST|RD|ROAD)"
+#1
+LeftOvers <-
+#2
+  Addresses %>% 
+#3
+  filter( !grepl(pattern, address),
+#4
+          !grepl("\\sAPT|UNIT\\s[\\d]+$", address),
+#5      
+          !grepl(" BOX ", address)
+#6    
+          )
+#7
+```
+
+My answer here.......
+1) a string indicating an exact pattern match 
+2) assign the variable LeftOvers
+3) from the Addresses table, use the chaining operator
+4) filters addresses for ones that do not match the pattern
+5) filters addresses for ones that do not contain APT or UNIT (followed by the number at the end)  
+6) filters addresses for ones that do not contain BOX       
+7) closes the filter function
+
+#### Part 2: Implement your method on the entire `Addresses` data set. Explain how your code works line by line.
+
+```{r}
+pattern <- "(ST|RD|ROAD|CIRCLE|WAY|TRAIL|LN|DR|CIR|AVE|PKWY|COURT|POINT|BLVD|CT|LANE|PL|PATH|LOOP)"
+#1
+LeftOvers <-   
+#2
+  Addresses %>%     
+#3
+  filter( !grepl(pattern, address),    
+#4
+          !grepl("\\sAPT|UNIT\\s[\\d]+$", address),   
+#5
+          !grepl("BOX|BX|B0X", address),
+#6
+          !grepl("HOSPITAL", address))
+#7
+
+```
+
+My answer here.......
+
+1) identifies common street endings and applies them to a pattern string
+2) assign the variable LeftOvers
+3) from the Addresses table, use the chaining operator
+4) filters addresses for ones that do not match the pattern
+5) filters addresses for ones that do not contain APT or UNIT (followed by the number at the end)
+6) filters addresses for ones that do not contain BOX 
+7) filters addresses for ones that do not contain HOSPITAL, since hospital is a place and not a street ending
+
+#### Additional Question 1: Present your result from part 2 by providing a table in descending order of popularity for the street name endings you found
+
+```{r}
+pattern <- "(ST|RD|ROAD|CIRCLE|WAY|TRAIL|LN|DR|CIR|AVE|PKWY|COURT|POINT|BLVD|CT|LANE|PL|PATH|LOOP)"
+StreetEnding <- Addresses %>% filter(grepl(pattern,address)) %>% tidyr::extract(address, into = "ending", regex = pattern) %>% group_by(ending) %>% summarise(count = n()) %>%  arrange(desc(count))
+head(StreetEnding)
+```
+
+#### Additional Question 2: Present your result by using ggplot to a bar chart in descending order of popularity for the street name endings you found previously.
+
+Note: make sure your order street names according to popularity, not alphabetically.
+
+```{r}
+ggplot(StreetEnding, aes(x = reorder(ending,-count), y = count)) +
+  geom_bar(stat="identity") + labs(x = "common endings", y= "count of endings", title = "Popularity of street name endings")
+```
+
+#### Additional Question 3: Comment on any patterns you see
+
+My answer here.......
