@@ -171,3 +171,5 @@ ggplot(StreetEnding, aes(x = reorder(ending,-count), y = count)) +
 #### Additional Question 3: Comment on any patterns you see
 
 My answer here.......
+
+The top 5 most common endings from the selected pattern are: ST,DR,RD,AVE,CT in order from greatest count of endings to lowest. ST,DR,RD by have a much greater number of counts than the rest, 
